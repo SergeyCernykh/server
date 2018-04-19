@@ -18,10 +18,10 @@
 using namespace std;
 using json = nlohmann::json;
 
-#define good_ans "HTTP-1.0 200 OK\r\n"
-#define bad_ans "HTTP-1.0 409 Bad request\r\n\r\n\0"
+#define good_ans "HTTP/1.0 200 OK\r\n"
+#define bad_ans "HTTP/1.0 409 Bad request\r\n\r\n"
 #define good_req "POST /hash HTTP/1.0\r\n"
-#define close_ans "HTTP-1.0 200 Closing...\r\n"
+#define close_ans "HTTP/1.0 200 Closing...\r\n"
 
 struct options {
     char* ip;
@@ -222,7 +222,7 @@ void Server_select::multiplexing() {
 
 char* Server:: pars_request(char* req, int fd) {
     cout << req << endl;
-    if ((req[0] == 'G') && (req[1] == 'E') && (req[2] == 'T')) {
+    if (!strncmp(req,"GET",3)) {
         kill(getppid(),SIGUSR1);
         write(fd,close_ans,strlen(close_ans));
         shutdown(fd, 2);
@@ -231,7 +231,7 @@ char* Server:: pars_request(char* req, int fd) {
     }
     char* header = new char[strlen(good_req)+1];
     strncpy(header, req, strlen(good_req));
-    cout <<header<< endl; 
+    //cout <<header<< endl; 
     if (strcmp(header, good_req) != 0) {cout << "Header is bad"<< endl; return NULL;}
     for(req = req+strlen(good_req); (*req !='{') && (*req != '\0'); req++) {}
     if (*req == '\0') {cout << "Request is bad"<< endl; return NULL;}
